@@ -1,7 +1,9 @@
 *.pyc
 .ipynb_checkpoints
 lib/build
-data/*
+data/cache/*
+data/CS674
+data/faster_rcnn_models/
 lib/datasets/CarFaceTest.py
 lib/datasets/detection674.py
 lib/datasets/factory_imagenet.py
@@ -9,3 +11,4 @@ lib/datasets/imagenet.py
 lib/datasets/kakou.py
 lib/pycocotools/_mask.c
 lib/pycocotools/_mask.so
+output/*
