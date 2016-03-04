@@ -29,6 +29,12 @@ case $DATASET in
     PT_DIR="pascal_voc"
     ITERS=70000
     ;;
+  CS674)
+    TRAIN_IMDB="CS674"
+    TEST_IMDB="CS674"
+    PT_DIR="CS674"
+    ITERS=20000
+    ;;
   coco)
     # This is a very long and slow training schedule
     # You can probably use fewer iterations and reduce the
@@ -66,3 +72,6 @@ time ./tools/test_net.py --gpu ${GPU_ID} \
   --imdb ${TEST_IMDB} \
   --cfg experiments/cfgs/faster_rcnn_end2end.yml \
   ${EXTRA_ARGS}
+
+  # --weights data/imagenet_models/${NET}.v2.caffemodel \
+    # --weights data/faster_rcnn_models/${NET}_faster_rcnn_final.caffemodel \

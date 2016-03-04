@@ -10,7 +10,8 @@
 __sets = {}
 
 from datasets.pascal_voc import pascal_voc
-from datasets.coco import coco
+# from datasets.coco import coco
+import datasets.detection674 #import detection674
 import numpy as np
 
 # Set up voc_<year>_<split> using selective search "fast" mode
@@ -19,20 +20,24 @@ for year in ['2007', '2012']:
         name = 'voc_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: pascal_voc(split, year))
 
-# Set up coco_2014_<split>
-for year in ['2014']:
-    for split in ['train', 'val', 'minival', 'valminusminival']:
-        name = 'coco_{}_{}'.format(year, split)
-        __sets[name] = (lambda split=split, year=year: coco(split, year))
+# # Set up coco_2014_<split>
+# for year in ['2014']:
+#     for split in ['train', 'val', 'minival', 'valminusminival']:
+#         name = 'coco_{}_{}'.format(year, split)
+#         __sets[name] = (lambda split=split, year=year: coco(split, year))
 
-# Set up coco_2015_<split>
-for year in ['2015']:
-    for split in ['test', 'test-dev']:
-        name = 'coco_{}_{}'.format(year, split)
-        __sets[name] = (lambda split=split, year=year: coco(split, year))
+# # Set up coco_2015_<split>
+# for year in ['2015']:
+#     for split in ['test', 'test-dev']:
+#         name = 'coco_{}_{}'.format(year, split)
+#         __sets[name] = (lambda split=split, year=year: coco(split, year))
+
+imageset = 'CS674'
+devkit = '/home/zhusj/data/CS674/'
 
 def get_imdb(name):
     """Get an imdb (image database) by name."""
+    __sets['CS674'] = (lambda imageset = imageset, devkit = devkit: datasets.detection674(imageset,devkit))
     if not __sets.has_key(name):
         raise KeyError('Unknown dataset: {}'.format(name))
     return __sets[name]()
