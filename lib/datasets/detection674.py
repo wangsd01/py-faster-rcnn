@@ -183,7 +183,7 @@ class detection674(imdb):
         """
 
         filename = os.path.join(self._data_path, 'train', 'boxes_'+ index + '.txt')
-        f = open(filename)
+        # f = open(filename)
         # split_line = f.readline().strip().split()
         num_objs = sum(1 for line in f)
         boxes = np.zeros((num_objs, 4), dtype=np.uint16)
@@ -221,7 +221,7 @@ class detection674(imdb):
             overlaps = scipy.sparse.csr_matrix(overlaps)
             # split_line = f.readline().strip().split()
 
-        f.close()
+        # f.close()
 
         return {'boxes' : boxes,
                 'gt_classes': gt_classes,

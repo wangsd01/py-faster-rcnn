@@ -34,7 +34,7 @@ NETS = {'vgg16': ('VGG16',
         'zf': ('ZF',
                   'ZF_faster_rcnn_final.caffemodel'),
         '674':('674',
-                  'vgg16_faster_rcnn_iter_20000seed_3.caffemodel')}
+                  'vgg16_faster_rcnn_iter_30000seed_3.caffemodel')}
 
 
 def vis_detections(im, class_name, dets, thresh=0.5):
@@ -71,39 +71,78 @@ def vis_detections(im, class_name, dets, thresh=0.5):
 
     return int(class_name)
 
-def demo(net, image_name):
+def demo(net):
     """Detect object classes in an image using pre-computed object proposals."""
 
     # Load the demo image
     #im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
-    # im_file = os.path.join('/home/zhusj/Github/py-faster-rcnn/data/CS674/Detection/test1/',image_name)
-    im = cv2.imread(image_name)
+    ftest = open('recognition_imageList.txt','r')
+    outputFile = open('RecognitionResult.txt','w')
+    number = ftest.readline().strip()
 
-    # Detect all object classes and regress object bounds
-    timer = Timer()
-    timer.tic()
-    scores, boxes = im_detect(net, im)
-    timer.toc()
-    print ('Detection took {:.3f}s for '
-           '{:d} object proposals').format(timer.total_time, boxes.shape[0])
+   
+    bbox_filename = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Recognition/test1/'+'boxes_'+number+'.txt'
+    while bbox_filename:
+        with open(bbox_filename, "r") as filestream:
+            print bbox_filename
+            im_file = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Recognition/test1/'+'image_'+number+'.png'
+            # print im_file
+            im = cv2.imread(im_file)
 
-    # Visualize detections for each class
-    CONF_THRESH = 0.8
-    NMS_THRESH = 0.3
-    result = np.zeros(12)
-    for cls_ind, cls in enumerate(CLASSES[1:]):
-        cls_ind += 1 # because we skipped background
-        cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
-        cls_scores = scores[:, cls_ind]
-        dets = np.hstack((cls_boxes,
-                          cls_scores[:, np.newaxis])).astype(np.float32)
-        keep = nms(dets, NMS_THRESH)
-        dets = dets[keep, :]
-        id = vis_detections(im, cls, dets, thresh=CONF_THRESH)
-        if id:
-            result[id-1]=1
+            # Detect all object classes and regress object bounds
+            timer = Timer()
+            timer.tic()
+            scores, boxes = im_detect(net, im)
+            timer.toc()
+            print ('Detection took {:.3f}s for '
+                   '{:d} object proposals').format(timer.total_time, boxes.shape[0])
+            for i,line in enumerate(filestream):
+                currentline = line.split(",")
 
-    return result
+                CONF_THRESH = 0.8
+                NMS_THRESH = 0.3
+                result = np.zeros(12)
+
+                # print currentline
+                cls_ind = int(currentline[1])
+                cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
+                cls_scores = scores[:, cls_ind]
+                dets = np.hstack((cls_boxes, cls_scores[:, np.newaxis])).astype(np.float32)
+                keep = nms(dets, NMS_THRESH)
+                dets = dets[keep, :]
+                inds = np.where(dets[:, -1] >= CONF_THRESH)[0]
+                # if inds.shape[0]>0:
+                # if inds.any:
+                print "inds:", inds
+                # print "dets:", dets
+                # print "cls_boxes:", cls_boxes
+                bbox = dets[0, :4]
+                outputFile.write(currentline[0]+','+str(int(bbox[0]))+','+ str(int(bbox[1]))+','+ str(int(bbox[2]))+','+ str(int(bbox[3])))
+                outputFile.write('\n')
+                # else:
+                #     # cls_scores_sorted = sorted(cls_scores)
+                #     sort_index = np.argsort(cls_scores)
+                #     # print  cls_scores_sorted[0],cls_scores_sorted[-1]
+                #     print  cls_scores[sort_index[0]],cls_scores[sort_index[-1]]
+                #     bbox = cls_boxes[sort_index[-1], :4]
+                #     outputFile.write(currentline[0]+','+str(int(bbox[0]))+','+ str(int(bbox[1]))+','+ str(int(bbox[2]))+','+ str(int(bbox[3])))
+                #     outputFile.write('\n')
+                # else:
+                #     outputFile.write(currentline[0]+','+str(280)+','+ str(160)+','+ str(360)+','+ str(240))
+                #     outputFile.write('\n')
+
+            # print number        
+            number = ftest.readline().strip() 
+            if number:            
+                bbox_filename = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Recognition/test1/'+'boxes_'+number+'.txt'
+            else:
+                break
+           
+    # id = vis_detections(im, cls, dets, thresh=CONF_THRESH)
+    # if id:
+    #     result[id-1]=1
+
+    # return result, dets
 
 def parse_args():
     """Parse input arguments."""
@@ -163,29 +202,31 @@ if __name__ == '__main__':
   #      demo(net, im_name)
 
   #  plt.show()
-    ftest = open('detection_imageList.txt','r')
-    outputFile = open('DetectionResult.txt','w')
-    number = ftest.readline().strip()
-    im_name = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Detection/test1/'+'image_'+number+'.png'
-    # result = demo(net, im_name)
-    # for x in xrange(1,13):
-    #     outputFile.write(str(number)+'_'+str(int(x))+','+str(int(result[x-1])))
-    #     outputFile.write('\n')
-    # print result
-    #plt.show()
-    #cv2.waitKey(0)
-    while im_name:
-        print im_name
-        result = demo(net, im_name)
-        for x in xrange(1,13):
-            outputFile.write(str(number)+'_'+str(int(x))+','+str(int(result[x-1])))
-            outputFile.write('\n')
-        #plt.show()
-        #cv2.waitKey(0)
-        number = ftest.readline().strip() 
-        if number:            
-            im_name = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Detection/test1/'+'image_'+number+'.png'
-        else:
-            break
+    # ftest = open('recognition_imageList.txt','r')
+    # outputFile = open('RecognitionResult.txt','w')
+    # number = ftest.readline().strip()
+    # im_name = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Recognition/test1/'+'image_'+number+'.png'
+    # # result = demo(net, im_name)
+    # # for x in xrange(1,13):
+    # #     outputFile.write(str(number)+'_'+str(int(x))+','+str(int(result[x-1])))
+    # #     outputFile.write('\n')
+    # # print result
+    # #plt.show()
+    # #cv2.waitKey(0)
+    # while im_name:
+    #     print im_name
+    #     result, dets = demo(net, im_name)
+
+    #     for x in xrange(1,13):
+    #         outputFile.write(str(number)+'_'+str(int(x))+','+str(int(result[x-1])))
+    #         outputFile.write('\n')
+    #     #plt.show()
+    #     #cv2.waitKey(0)
+    #     number = ftest.readline().strip() 
+    #     if number:            
+    #         im_name = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Recognition/test1/'+'image_'+number+'.png'
+    #     else:
+    #         break
 
     #plt.show()
+    demo(net)
