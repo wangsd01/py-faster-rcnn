@@ -40,6 +40,7 @@ class SolverWrapper(object):
                     rdl_roidb.add_bbox_regression_targets(roidb)
             print 'done'
 
+        # self.solver = caffe.AdamSolver(solver_prototxt)
         self.solver = caffe.SGDSolver(solver_prototxt)
         if pretrained_model is not None:
             print ('Loading pretrained model '
@@ -78,7 +79,8 @@ class SolverWrapper(object):
         infix = ('_' + cfg.TRAIN.SNAPSHOT_INFIX
                  if cfg.TRAIN.SNAPSHOT_INFIX != '' else '')
         filename = (self.solver_param.snapshot_prefix + infix +
-                    '_iter_{:d}'.format(self.solver.iter) + '.caffemodel')
+                    '_iter_{:d}'.format(self.solver.iter) + 
+                    'seed_{:d}'.format(cfg.RNG_SEED) + '.caffemodel')
         filename = os.path.join(self.output_dir, filename)
 
         net.save(str(filename))

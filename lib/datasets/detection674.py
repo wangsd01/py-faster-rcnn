@@ -24,18 +24,18 @@ class detection674(imdb):
         imdb.__init__(self, image_set)
         self._image_set = image_set
         self._devkit_path = devkit_path
-        self._data_path = os.path.join(self._devkit_path, 'Detection')
+        self._data_path = os.path.join(self._devkit_path, 'total')
         self._classes = ('__background__', # always index 0
-                         '1', '2', '3', '4',
-                         '5', '6', '7', '8', '9',
-                         '10', '11', '12')
+                         '_1', '_2', '_3', '_4',
+                         '_5', '_6', '_7', '_8', '_9',
+                         '_10', '_11', '_12')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
         self._image_ext = '.png'
         # self._image_index = self._load_image_set_index()
         # self._image_index = [x for x in range(1056)]
         self._image_index = self._load_image_set_index('ImageList_train.txt')
         # Default to roidb handler
-        # self._roidb_handler = self.selective_search_roidb
+        self._roidb_handler = self.selective_search_roidb
         self._salt = str(uuid.uuid4())
         self._comp_id = 'comp4'
 
@@ -167,6 +167,7 @@ class detection674(imdb):
         box_list = []
         for i in xrange(raw_data.shape[0]):
             boxes = raw_data[i][:, (1, 0, 3, 2)] - 1
+            # boxes = raw_data[i][:, :] - 1
             keep = ds_utils.unique_boxes(boxes)
             boxes = boxes[keep, :]
             keep = ds_utils.filter_small_boxes(boxes, self.config['min_size'])
@@ -183,30 +184,38 @@ class detection674(imdb):
 
         filename = os.path.join(self._data_path, 'train', 'boxes_'+ index + '.txt')
         f = open(filename)
-        split_line = f.readline().strip().split()
-        num_objs = sum(1 for line in f) + 1
+        # split_line = f.readline().strip().split()
+        num_objs = sum(1 for line in f)
         boxes = np.zeros((num_objs, 4), dtype=np.uint16)
         gt_classes = np.zeros((num_objs), dtype=np.int32)
         overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
         # "Seg" area for pascal is just the box area
         seg_areas = np.zeros((num_objs), dtype=np.float32)
-        print split_line
+        # print split_line
 
         with open(filename, "r") as filestream:
             for i,line in enumerate(filestream):
                 currentline = line.split(",")
-                x1 = float (currentline[1])
-                y1 = float (currentline[2])
-                x2 = float (currentline[3])
-                y2 = float (currentline[4])
-                cls = self._class_to_ind[str(currentline[0])]
-                print x1, x2
+                padding = 1
+                x1 = float (currentline[1])+padding
+                y1 = float (currentline[2])+padding
+                x2 = float (currentline[3])-padding
+                y2 = float (currentline[4])-padding
+                cls = self._class_to_ind['_'+str(currentline[0])]
+                print i, ":", cls, x1, y1, x2, y2
                 boxes[i,:] = [x1, y1, x2, y2]
-                assert (boxes[i, 2] >= boxes[i, 0]).all()
+                # print boxes
+                assert (boxes[i, 2] > boxes[i, 0]).all()
+                assert (boxes[i, 0] > 0).all()
+                assert (boxes[i, 2] < 640).all()
+                assert (boxes[i, 3] > boxes[i, 1]).all()
+                assert (boxes[i, 1] > 0).all()
+                assert (boxes[i, 3] < 400).all()
                 # print boxes[i,:]
                 gt_classes[i] = cls
                 overlaps[i,cls] = 1.0
                 seg_areas[i] = (x2 - x1 + 1) * (y2 - y1 + 1)
+                assert (seg_areas[i]>0).all()
 
             # print f
             overlaps = scipy.sparse.csr_matrix(overlaps)
@@ -336,6 +345,6 @@ class detection674(imdb):
 
 if __name__ == '__main__':
     from datasets.detection674 import detection674
-    d = detection674('CS674', '/home/zhusj/data/CS674/Detection/train')
+    d = detection674('CS674', '/home/zhusj/data/CS674/total/train')
     res = d.roidb
     from IPython import embed; embed()

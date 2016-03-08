@@ -24,17 +24,17 @@ import scipy.io as sio
 import caffe, os, sys, cv2
 import argparse
 
-CLASSES = ('__background__',
-           'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair',
-           'cow', 'diningtable', 'dog', 'horse',
-           'motorbike', 'person', 'pottedplant',
-           'sheep', 'sofa', 'train', 'tvmonitor')
+CLASSES = ('__background__', # always index 0
+                         '1', '2', '3', '4',
+                         '5', '6', '7', '8', '9',
+                         '10', '11', '12')
 
 NETS = {'vgg16': ('VGG16',
                   'VGG16_faster_rcnn_final.caffemodel'),
         'zf': ('ZF',
-                  'ZF_faster_rcnn_final.caffemodel')}
+                  'ZF_faster_rcnn_final.caffemodel'),
+        '674':('674',
+                  'vgg_cnn_m_1024_faster_rcnn_iter_20000seed_3.caffemodel')}
 
 
 def vis_detections(im, class_name, dets, thresh=0.5):
@@ -117,14 +117,18 @@ if __name__ == '__main__':
 
     args = parse_args()
 
-    prototxt = os.path.join(cfg.MODELS_DIR, NETS[args.demo_net][0],
-                            'faster_rcnn_alt_opt', 'faster_rcnn_test.pt')
+
+    #prototxt = os.path.join(cfg.MODELS_DIR, NETS[args.demo_net][0],
+    #                        'faster_rcnn_alt_opt', 'faster_rcnn_test.pt')
     caffemodel = os.path.join(cfg.DATA_DIR, 'faster_rcnn_models',
                               NETS[args.demo_net][1])
 
+    prototxt = '/home/zhusj/Github/py-faster-rcnn/models/CS674/VGG_CNN_M_1024/faster_rcnn_end2end/test.prototxt'
+    #caffemodel = '/home/zhusj/Github/py-faster-rcnn/output/foobar/CS674/vgg_cnn_m_1024_faster_rcnn_iter_20000seed_3.caffemodel'
     if not os.path.isfile(caffemodel):
-        raise IOError(('{:s} not found.\nDid you run ./data/script/'
-                       'fetch_faster_rcnn_models.sh?').format(caffemodel))
+        raise IOError(('{:s} not found.').format(caffemodel))
+    if not os.path.isfile(prototxt):
+        raise IOError(('{:s} not found.').format(prototxt))
 
     if args.cpu_mode:
         caffe.set_mode_cpu()
@@ -143,7 +147,7 @@ if __name__ == '__main__':
 
  #   im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
   #              '001763.jpg', '004545.jpg']
-    im_names = ['image_1020.png']
+    im_names = ['image_972.png']
     for im_name in im_names:
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
         print 'Demo for data/demo/{}'.format(im_name)

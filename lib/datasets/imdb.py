@@ -110,12 +110,22 @@ class imdb(object):
             # print boxes
             oldx1 = boxes[:, 0].copy()
             oldx2 = boxes[:, 2].copy()
+            padding = 0
             # boxes[:, 0] = widths[i] - oldx2 - 1
             # boxes[:, 2] = widths[i] - oldx1 - 1
-            boxes[:, 0] = widths[i] - oldx2
-            boxes[:, 2] = widths[i] - oldx1
+            boxes[:, 0] = widths[i] - oldx2 + padding
+            boxes[:, 2] = widths[i] - oldx1 - padding
+            #for b in range(len(boxes)):
+             #   if boxes[b][2] < boxes[b][0]:
+              #      boxes[b][0] = 0
+
+            # print "Flipping"
+            print i, num_images, self.roidb[i]['boxes']
             print boxes
-            assert (boxes[:, 2] >= boxes[:, 0]).all()
+            assert (boxes[:, 2] > boxes[:, 0]).all()
+            assert (boxes[:, 3] > boxes[:, 1]).all()
+            assert (boxes[:, 0] >= 1).all()
+            assert (boxes[:, 1] >= 1).all()
             entry = {'boxes' : boxes,
                      'gt_overlaps' : self.roidb[i]['gt_overlaps'],
                      'gt_classes' : self.roidb[i]['gt_classes'],

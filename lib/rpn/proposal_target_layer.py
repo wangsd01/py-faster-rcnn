@@ -36,6 +36,11 @@ class ProposalTargetLayer(caffe.Layer):
         # bbox_outside_weights
         top[4].reshape(1, self._num_classes * 4)
 
+        if DEBUG:
+            self._count = 0
+            self._fg_num = 0
+            self._bg_num = 0
+
     def forward(self, bottom, top):
         # Proposal ROIs (0, x1, y1, x2, y2) coming from RPN
         # (i.e., rpn.proposal_layer.ProposalLayer), or any other source

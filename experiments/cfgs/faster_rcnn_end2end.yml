@@ -1,5 +1,6 @@
 EXP_DIR: faster_rcnn_end2end
 TRAIN:
+  # BATCH_SIZE: 1
   HAS_RPN: True
   IMS_PER_BATCH: 1
   BBOX_NORMALIZE_TARGETS_PRECOMPUTED: True
@@ -7,5 +8,8 @@ TRAIN:
   RPN_BATCHSIZE: 256
   PROPOSAL_METHOD: gt
   BG_THRESH_LO: 0.0
+  SNAPSHOT_ITERS: 500
+  # FG_FRACTION: 2.0
 TEST:
   HAS_RPN: True
+MODELS_DIR: /home/zhusj/Github/py-faster-rcnn/models/CS674
