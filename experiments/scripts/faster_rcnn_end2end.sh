@@ -33,7 +33,7 @@ case $DATASET in
     TRAIN_IMDB="CS674"
     TEST_IMDB="CS674"
     PT_DIR="CS674"
-    ITERS=20000
+    ITERS=70000
     ;;
   coco)
     # This is a very long and slow training schedule

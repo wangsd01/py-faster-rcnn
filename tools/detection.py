@@ -69,11 +69,14 @@ def vis_detections(im, class_name, dets, thresh=0.5):
     plt.tight_layout()
     plt.draw()
 
+    return int(class_name)
+
 def demo(net, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
 
     # Load the demo image
-    im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
+    #im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
+    im_file = os.path.join('/home/zhusj/Github/py-faster-rcnn/data/CS674/Detection/test1/',image_name)
     im = cv2.imread(im_file)
 
     # Detect all object classes and regress object bounds
@@ -87,6 +90,7 @@ def demo(net, image_name):
     # Visualize detections for each class
     CONF_THRESH = 0.8
     NMS_THRESH = 0.3
+    result = np.zeros(12)
     for cls_ind, cls in enumerate(CLASSES[1:]):
         cls_ind += 1 # because we skipped background
         cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
@@ -95,7 +99,11 @@ def demo(net, image_name):
                           cls_scores[:, np.newaxis])).astype(np.float32)
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
-        vis_detections(im, cls, dets, thresh=CONF_THRESH)
+        id = vis_detections(im, cls, dets, thresh=CONF_THRESH)
+        if id:
+            result[id-1]=1
+
+    return result
 
 def parse_args():
     """Parse input arguments."""
@@ -147,10 +155,37 @@ if __name__ == '__main__':
 
  #   im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
   #              '001763.jpg', '004545.jpg']
-    im_names = ['image_972.png']
-    for im_name in im_names:
-        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
-        print 'Demo for data/demo/{}'.format(im_name)
-        demo(net, im_name)
+  #  im_names = ['image_972.png']
 
-    plt.show()
+  #  for im_name in im_names:
+  #      print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+  #      print 'Demo for data/demo/{}'.format(im_name)
+  #      demo(net, im_name)
+
+  #  plt.show()
+    ftest = open('detection_imageList.txt','r')
+    outputFile = open('DetectionResult.txt','w')
+    number = ftest.readline().strip()
+    im_name = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Detection/test1/'+'image_'+number+'.png'
+    result = demo(net, im_name)
+    for x in xrange(1,13):
+        outputFile.write(str(number)+'_'+str(int(x))+','+str(int(result[x-1])))
+        outputFile.write('\n')
+    print result
+    #plt.show()
+    #cv2.waitKey(0)
+    while im_name:
+        print im_name
+        result = demo(net, im_name)
+        for x in xrange(1,13):
+            outputFile.write(str(number)+'_'+str(int(x))+','+str(int(result[x-1])))
+            outputFile.write('\n')
+        #plt.show()
+        #cv2.waitKey(0)
+        number = ftest.readline().strip() 
+        if number:            
+            im_name = '/home/zhusj/Github/py-faster-rcnn/data/CS674/Detection/test1/'+'image_'+number+'.png'
+        else:
+            break
+
+    #plt.show()
